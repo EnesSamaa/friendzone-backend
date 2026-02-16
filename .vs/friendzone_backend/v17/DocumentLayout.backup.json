@@ -1,0 +1,53 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Enes\\friendzone_backend\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{ED4398B9-B627-C21B-AFA4-7599A46EB7B5}|friendzone_backend.csproj|c:\\users\\enes\\friendzone_backend\\friendzone_backend.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{ED4398B9-B627-C21B-AFA4-7599A46EB7B5}|friendzone_backend.csproj|solutionrelative:friendzone_backend.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ED4398B9-B627-C21B-AFA4-7599A46EB7B5}|friendzone_backend.csproj|c:\\users\\enes\\friendzone_backend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{ED4398B9-B627-C21B-AFA4-7599A46EB7B5}|friendzone_backend.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\Enes\\friendzone_backend\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Users\\Enes\\friendzone_backend\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-02-16T14:06:17.776Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "friendzone_backend.csproj",
+              "DocumentMoniker": "C:\\Users\\Enes\\friendzone_backend\\friendzone_backend.csproj",
+              "RelativeDocumentMoniker": "friendzone_backend.csproj",
+              "ToolTip": "C:\\Users\\Enes\\friendzone_backend\\friendzone_backend.csproj",
+              "RelativeToolTip": "friendzone_backend.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-02-16T14:05:44.58Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
