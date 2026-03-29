@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using friendzone_backend.Data;
 using friendzone_backend.Entities;
 using friendzone_backend.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace friendzone_backend.Controllers
 {
@@ -11,10 +12,13 @@ namespace friendzone_backend.Controllers
     public class UserController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly JwtService _jwtService;
 
-        public UserController(AppDbContext context)
+
+        public UserController(AppDbContext context, JwtService jwtService)
         {
             _context = context;
+            _jwtService = jwtService;
         }
 
         // =========================
@@ -70,7 +74,17 @@ namespace friendzone_backend.Controllers
             if (!isPasswordValid)
                 return Unauthorized("Şifre yanlış");
 
-            return Ok("Login başarılı (şimdilik)");
+            var token = _jwtService.GenerateToken(user.Id, user.Username);
+            return Ok(new { token });
+        }
+        
+        [Authorize]
+        [HttpGet("me")]
+        public IActionResult Me()
+        {
+            var userId = User.FindFirst("userId")?.Value;
+            var username = User.FindFirst("username")?.Value;
+            return Ok(new { userId, username });
         }
     }
 }
