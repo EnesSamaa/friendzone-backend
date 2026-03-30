@@ -5,6 +5,7 @@ using friendzone_backend.Entities;
 using friendzone_backend.DTOs;
 using friendzone_backend.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace friendzone_backend.Controllers
 {
@@ -57,6 +58,7 @@ namespace friendzone_backend.Controllers
         }
 
         [HttpPost("login")]
+        [EnableRateLimiting("login")]
         public async Task<IActionResult> Login(LoginRequestDto request)
         {
             var user = await _context.Users

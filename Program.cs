@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using friendzone_backend.Middleware;
 using friendzone_backend.Services;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +68,30 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddRateLimiter(options =>
+{
+    // Login için — 1 dakikada max 5 istek
+    options.AddFixedWindowLimiter("login", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 5;
+        opt.QueueLimit = 0;
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+
+    // Invite için — 1 dakikada max 10 istek
+    options.AddFixedWindowLimiter("invite", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 10;
+        opt.QueueLimit = 0;
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+
+    // Limit aşılınca 429 dön
+    options.RejectionStatusCode = 429;
+});
+
 var app = builder.Build();
 
 // Swagger (Development ortamında)
@@ -75,8 +102,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseRateLimiter();
 
-app.UseAuthentication(); // ← Authorization'dan önce olmalı
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

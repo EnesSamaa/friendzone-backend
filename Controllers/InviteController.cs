@@ -5,6 +5,7 @@ using friendzone_backend.Data;
 using friendzone_backend.DTOs;
 using friendzone_backend.Entities;
 using friendzone_backend.Services;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace friendzone_backend.Controllers
 {
@@ -24,6 +25,7 @@ namespace friendzone_backend.Controllers
 
         // Davet gönder
         [HttpPost("send")]
+        [EnableRateLimiting("invite")]
         public async Task<IActionResult> Send(SendInviteDto dto)
         {
             var senderId = _currentUser.UserId;
@@ -31,14 +33,34 @@ namespace friendzone_backend.Controllers
             if (senderId == dto.ReceiverId)
                 return BadRequest("Kendine davet gönderemezsin");
 
-            // Zaten bekleyen davet var mı?
-            var exists = await _context.Invites.AnyAsync(x =>
+            // Duplicate engeli — zaten pending davet var mı?
+            var pendingExists = await _context.Invites.AnyAsync(x =>
                 x.SenderId == senderId &&
                 x.ReceiverId == dto.ReceiverId &&
                 x.Status == InviteStatus.Pending);
 
-            if (exists)
+            if (pendingExists)
                 return BadRequest("Zaten bekleyen bir davet var");
+
+            // Cooldown — son 30 saniyede davet gönderdi mi?
+            var cooldownLimit = DateTime.UtcNow.AddSeconds(-30);
+            var onCooldown = await _context.Invites.AnyAsync(x =>
+                x.SenderId == senderId &&
+                x.ReceiverId == dto.ReceiverId &&
+                x.CreatedAt >= cooldownLimit);
+
+            if (onCooldown)
+                return BadRequest("Çok hızlı davet gönderiyorsun, biraz bekle");
+
+            // Expiration — süresi dolmuş davetleri temizle (10 dakika)
+            var expirationLimit = DateTime.UtcNow.AddMinutes(-10);
+            var expiredInvites = _context.Invites.Where(x =>
+                x.SenderId == senderId &&
+                x.ReceiverId == dto.ReceiverId &&
+                x.Status == InviteStatus.Pending &&
+                x.CreatedAt <= expirationLimit);
+
+            _context.Invites.RemoveRange(expiredInvites);
 
             var invite = new Invite
             {

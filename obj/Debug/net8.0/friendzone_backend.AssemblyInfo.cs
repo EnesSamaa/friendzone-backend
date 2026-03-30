@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("friendzone_backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+33ff0f9243f5538f05720cd4faadd024d2296fb3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b28cff899953ef32ef1010b8e6a8f30680f671aa")]
 [assembly: System.Reflection.AssemblyProductAttribute("friendzone_backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("friendzone_backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
