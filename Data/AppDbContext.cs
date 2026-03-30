@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<Location> Locations => Set<Location>(); // ← eklendi
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
