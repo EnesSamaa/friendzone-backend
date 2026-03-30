@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using friendzone_backend.Data;
 using friendzone_backend.DTOs;
 using friendzone_backend.Entities;
-using System.Security.Claims;
+using friendzone_backend.Services;
 
 namespace friendzone_backend.Controllers
 {
@@ -14,26 +14,26 @@ namespace friendzone_backend.Controllers
     public class LocationController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly CurrentUserService _currentUser;
+        private readonly IMatchingService _matchingService;
 
-        public LocationController(AppDbContext context)
+        public LocationController(AppDbContext context, CurrentUserService currentUser, IMatchingService matchingService)
         {
             _context = context;
+            _currentUser = currentUser;
+            _matchingService = matchingService;
         }
 
         [HttpPost("update")]
         public async Task<IActionResult> UpdateLocation(UpdateLocationDto dto)
         {
-            var userIdStr = User.FindFirst("userId")?.Value;
-            if (userIdStr == null) return Unauthorized();
-
-            var userId = Guid.Parse(userIdStr);
+            var userId = _currentUser.UserId;
 
             var location = await _context.Locations
                 .FirstOrDefaultAsync(x => x.UserId == userId);
 
             if (location == null)
             {
-                // İlk kez konum kaydediliyor
                 location = new Location
                 {
                     Id = Guid.NewGuid(),
@@ -46,7 +46,6 @@ namespace friendzone_backend.Controllers
             }
             else
             {
-                // Mevcut konum güncelleniyor
                 location.Latitude = dto.Latitude;
                 location.Longitude = dto.Longitude;
                 location.UpdatedAt = DateTime.UtcNow;
@@ -55,6 +54,14 @@ namespace friendzone_backend.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Konum güncellendi", dto.Latitude, dto.Longitude });
+        }
+
+        [HttpGet("nearby")]
+        public async Task<IActionResult> GetNearbyUsers([FromQuery] double radiusKm = 2)
+        {
+            var userId = _currentUser.UserId;
+            var users = await _matchingService.GetNearbyUsersAsync(userId, radiusKm);
+            return Ok(users);
         }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using friendzone_backend.Data;
 using friendzone_backend.Entities;
 using friendzone_backend.DTOs;
+using friendzone_backend.Services;
 using Microsoft.AspNetCore.Authorization;
 
 namespace friendzone_backend.Controllers
@@ -13,17 +14,15 @@ namespace friendzone_backend.Controllers
     {
         private readonly AppDbContext _context;
         private readonly JwtService _jwtService;
+        private readonly CurrentUserService _currentUser;
 
-
-        public UserController(AppDbContext context, JwtService jwtService)
+        public UserController(AppDbContext context, JwtService jwtService, CurrentUserService currentUser)
         {
             _context = context;
             _jwtService = jwtService;
+            _currentUser = currentUser;
         }
 
-        // =========================
-        // REGISTER
-        // =========================
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequestDto request)
         {
@@ -57,9 +56,6 @@ namespace friendzone_backend.Controllers
             return Ok("Kayıt başarılı");
         }
 
-        // =========================
-        // LOGIN
-        // =========================
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequestDto request)
         {
@@ -77,14 +73,16 @@ namespace friendzone_backend.Controllers
             var token = _jwtService.GenerateToken(user.Id, user.Username);
             return Ok(new { token });
         }
-        
+
         [Authorize]
         [HttpGet("me")]
         public IActionResult Me()
         {
-            var userId = User.FindFirst("userId")?.Value;
-            var username = User.FindFirst("username")?.Value;
-            return Ok(new { userId, username });
+            return Ok(new
+            {
+                userId = _currentUser.UserId,
+                username = _currentUser.Username
+            });
         }
     }
 }
