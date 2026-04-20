@@ -1,3 +1,203 @@
+Friendzone Backend Sistemi
+
+Friendzone Backend, .NET 8 ve PostgreSQL kullanılarak geliştirilmiş lokasyon tabanlı bir sosyal eşleşme REST API sistemidir. Sistem, kullanıcıların konum bilgilerini paylaşarak yakın kullanıcıları keşfetmesini ve davet tabanlı etkileşim kurmasını sağlayacak şekilde tasarlanmıştır.
+
+Proje geliştirilirken ölçeklenebilirlik, veri tutarlılığı ve sistem güvenliği temel mühendislik prensipleri olarak ele alınmıştır.
+
+Proje Amacı
+
+Bu projenin temel amacı modern backend mimari prensipleri kullanılarak güvenli ve performanslı bir REST API geliştirmektir.
+
+Projenin hedefleri:
+
+Kullanıcı kimlik doğrulama sisteminin güvenli şekilde uygulanması
+Kullanıcı konum bilgilerinin saklanması
+Aktif kullanıcıların belirlenmesi
+Coğrafi mesafe hesaplamaları ile yakın kullanıcıların bulunması
+Kullanıcılar arası davet mekanizmasının yönetilmesi
+Veri tutarlılığının transaction ve constraint mekanizmaları ile sağlanması
+Kullanılan Teknolojiler
+Teknoloji	Açıklama
+.NET 8	Modern ve yüksek performanslı backend geliştirme platformu
+ASP.NET Core Web API	REST API geliştirme altyapısı
+Entity Framework Core	ORM (Object Relational Mapping)
+PostgreSQL	İlişkisel veritabanı sistemi
+JWT	Kimlik doğrulama mekanizması
+BCrypt	Şifre hashleme algoritması
+Rate Limiter	İstek sınırlama mekanizması
+Logging	Sistem izleme ve hata yönetimi
+Sistem Mimarisi
+
+Proje, katmanlı mimari prensiplerine göre geliştirilmiştir.
+
+Client (HTTP Request)
+        ↓
+Controller Layer
+        ↓
+Service Layer
+        ↓
+DbContext (EF Core)
+        ↓
+PostgreSQL Database
+
+Bu yapı sayesinde:
+
+Kodun bakım kolaylığı artırılmıştır
+İş mantığı kontrol altında tutulmuştur
+Veritabanı işlemleri soyutlanmıştır
+Temel Modüller
+Authentication Modülü
+
+Kullanıcı kayıt ve giriş işlemlerini yönetir.
+
+Özellikler:
+
+BCrypt ile şifre hashleme
+JWT token üretimi
+Token doğrulama
+24 saat token geçerliliği
+Location ve Presence Modülü
+
+Kullanıcı konumlarını saklar ve aktif kullanıcıları belirler.
+
+Presence Logic:
+
+UpdatedAt >= DateTime.UtcNow.AddMinutes(-5)
+
+Bu kurala göre son 5 dakika içinde konum güncelleyen kullanıcılar aktif kabul edilir.
+
+Matching Modülü
+
+Kullanıcılar arası mesafe hesaplaması yaparak yakın kullanıcıları bulur.
+
+Kullanılan yöntem:
+
+Haversine formülü ile mesafe hesaplama
+Maksimum 2 km filtreleme
+Aktif kullanıcı filtreleme
+Kendini hariç tutma
+
+Random sıralama faktörü:
+
+.OrderBy(x => x.DistanceKm + 
+             (Random.Shared.NextDouble() * 0.3))
+
+Bu yaklaşım, her istekte aynı kullanıcıların listelenmesini engeller.
+
+Invite Modülü
+
+Kullanıcılar arası davet sürecini yönetir.
+
+Özellikler:
+
+Davet gönderme
+Davet listeleme
+Davet kabul etme
+Davet reddetme
+
+Invite Status Enum:
+
+public enum InviteStatus
+{
+    Pending = 0,
+    Accepted = 1,
+    Rejected = 2
+}
+Veritabanı Tasarımı
+
+Projede üç ana tablo bulunmaktadır:
+
+Users
+Locations
+Invites
+Partial Unique Index
+
+Aynı kullanıcıya birden fazla bekleyen davet gönderilmesini engellemek için:
+
+CREATE UNIQUE INDEX ux_invite_pending
+ON "Invites" ("SenderId", "ReceiverId")
+WHERE "Status" = 0;
+
+Bu yapı race condition problemlerini önlemek için kritik öneme sahiptir.
+
+Güvenlik ve Sistem Koruma
+
+Sistem güvenliği için aşağıdaki mekanizmalar uygulanmıştır:
+
+Authentication Security
+BCrypt password hashing
+JWT doğrulama
+Token expiration
+Rate Limiting
+Endpoint	Limit
+Login	5 istek / dakika
+Invite	10 istek / dakika
+Location Update	10 istek / 10 saniye
+Nearby Query	5 istek / 10 saniye
+
+Bu mekanizma sistemin kötüye kullanımını önler.
+
+Logging Sistemi
+
+Tüm HTTP istekleri loglanmaktadır.
+
+Loglanan bilgiler:
+
+UserId
+HTTP Method
+Endpoint
+Status Code
+Execution Duration
+
+Örnek log:
+
+[UserId: 42] [POST /api/invite/send] [200] [83ms]
+API Endpointleri
+Authentication
+POST /api/auth/register
+POST /api/auth/login
+Location
+POST /api/location/update
+GET  /api/location/nearby
+Invite
+POST /api/invite/send
+GET  /api/invite/list
+POST /api/invite/respond
+Projeyi Çalıştırma
+Gereksinimler
+.NET 8 SDK
+PostgreSQL
+Repository Klonlama
+git clone https://github.com/kullaniciadi/friendzone-backend.git
+
+cd friendzone-backend
+Veritabanı Ayarları
+
+appsettings.json dosyasını düzenleyin:
+
+"ConnectionStrings": {
+  "DefaultConnection":
+  "Host=localhost;Port=5432;Database=friendzone;Username=postgres;Password=yourpassword"
+}
+Migration Uygulama
+dotnet ef database update
+Uygulamayı Çalıştırma
+dotnet run
+Gelecek Geliştirmeler
+
+Planlanan geliştirmeler:
+
+Redis Cache entegrasyonu
+AI destekli profil oluşturma
+SignalR ile gerçek zamanlı bildirim
+Health Check endpointleri
+Background job sistemi
+
+
+
+
+
+
 Friendzone Backend
 
 Friendzone Backend is a location-based social matching REST API developed using .NET 8 and PostgreSQL.
